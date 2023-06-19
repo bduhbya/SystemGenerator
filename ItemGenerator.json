@@ -1,0 +1,36 @@
+{
+  "version":"0.1",
+  "type":"step",
+  "roll":
+  {
+    "die":"1d10"
+  },
+  "rollResult":
+  {
+    "1-2":
+    {
+      "value":"Melee Weapon",
+      "file":"meleeWeapons.json"
+    },
+    "3-4":
+    {
+      "value":"Ranged Weapon",
+      "file":"rangedWeapons.json"
+    },
+    "5-6":
+    {
+      "value":"Armour",
+      "file":"Armours.json"
+    },
+    "7-8":
+    {
+      "value":"Gear and Tools",
+      "file":"gearAndTools.json"
+    },
+    "9-10":
+    {
+      "value":"Starship Component",
+      "file":"starshipComponents.json"
+    }
+  }
+}

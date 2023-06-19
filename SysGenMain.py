@@ -9,10 +9,10 @@ parser = argparse.ArgumentParser(description='Warhammer 40K FFG System Generator
                                  '. By default allows user to enter each roll result every time a role is required in the instructions. The options allow for various levels of automating the generation.')
 
 # Add arguments to the parser
-parser.add_argument('--configFile', help='Configuration file containing generation steps and instructions')
+parser.add_argument('-c', '--configFile', required=True, help='Configuration file containing generation steps and instructions')
 # parser.add_argument('--age', type=int, help='Age of the user')
-parser.add_argument('--automatic', action='store_false', help='Make all rolls for generated content internally without user interaction')
-parser.add_argument('--promptOutcome', action='store_false', help='Prompt for user acceptance of each role result. If the user does not like the role, the user can ask for a reroll')
+parser.add_argument('-a', '--automatic', default=False, action='store_true', help='Make all rolls for generated content internally without user interaction')
+parser.add_argument('-o', '--promptOutcome', default=False, action='store_true', help='Prompt for user acceptance of each role result. If the user does not like the role, the user can ask for a reroll')
 
 current_directory = os.getcwd()
 print(current_directory)
@@ -65,20 +65,20 @@ def getRoll(die, numRolls, modifiers, minimum, maximum):
     return roll
 
 #TODO move into modules
-def generateSystem(automatic):
+def generateSystem(automatic, configFile):
     print("Generating system features...")
     # Open the JSON file
-    with open(getFullPath(SYSTEM_GEN_STEPS)) as file:
+    with open(configFile) as file:
         # Load the JSON data
         data = json.load(file)
 
     # Access the parsed data
     print(data)
-    steps = data["defineSteps"]
-    for step in steps:
-        generationSteps.append(step)
+    # steps = data["defineSteps"]
+    # for step in steps:
+    #     generationSteps.append(step)
     
-    print(generationSteps)
+    # print(generationSteps)
 
 def getFullPath(file_name):
     return config_file_path + file_name
@@ -90,12 +90,12 @@ def main():
     # all_automatic_entries = askAutomaticGeneration(ALL_ATTRIBUTES_PROMPT)
     args = parser.parse_args()
     all_automatic_entries = args.automatic
-    print("Proceeding with options. automatic: " + str(all_automatic_entries))
+    configFile = args.configFile
+    print("Proceeding with options")
+    print("automatic: " + str(all_automatic_entries))
+    print("configFile: " + str(configFile))
     
-    generateSystem(all_automatic_entries)
-    #generateSystemFeatures(all_automatic_entries)
-    #random_number = random.randint(1, 5)
-    #print("Rand: " + str(random_number))
+    generateSystem(all_automatic_entries, configFile)
     
 
 if __name__ == "__main__":
