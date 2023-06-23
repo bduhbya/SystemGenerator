@@ -6,8 +6,6 @@ class DieRoll:
     dieType: int
 
 def parseDie(die):
-    if die == None:
-        return None
     try:
         parts = str.split(die,'d')
         if len(parts) != 2:
