@@ -11,19 +11,14 @@ class LogTrace:
         logger.add(
             log_file_path,
             level=log_level,
-            format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {module}.{function} | {message}",
+            format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {module}.{function}:{line} | {message}",
             rotation="10 MB",
             filter=lambda record: record["extra"].get("logger_name") == logger_name,
         )
         self.logger = logger.bind(logger_name=logger_name)
 
-    # TODO: update to print the correct call stack frame
     def log(self, level, message, **kwargs):
-        stack = inspect.stack()
-        caller_frame = stack[2].frame if len(stack) >= 3 else stack[1].frame
-        module_name = caller_frame.f_globals['__name__']
-        method_name = caller_frame.f_code.co_name
-        self.logger.opt(depth=1).log(level, message, module=module_name, function=method_name, **kwargs)
+        self.logger.opt(depth=2, exception=None, lazy=False).log(level, message, **kwargs)
 
     def error(self, message, **kwargs):
         self.log("ERROR", message, **kwargs)
@@ -36,3 +31,8 @@ class LogTrace:
 
     def debug(self, message, **kwargs):
         self.log("DEBUG", message, **kwargs)
+
+#Quick local test for manual checking
+if __name__ == "__main__":
+    tracer = LogTrace('test_tracer', "Local_test_file.txt", LOG_LEVEL_DEBUG)
+    tracer.error("An error occurred. {error_code}", error_code=123)
