@@ -1,4 +1,3 @@
-import inspect
 from loguru import logger
 
 LOG_LEVEL_DEBUG = "DEBUG"
@@ -21,16 +20,16 @@ class LogTrace:
         self.logger.opt(depth=2, exception=None, lazy=False).log(level, message, **kwargs)
 
     def error(self, message, **kwargs):
-        self.log("ERROR", message, **kwargs)
+        self.log(LOG_LEVEL_ERROR, message, **kwargs)
 
     def warning(self, message, **kwargs):
-        self.log("WARNING", message, **kwargs)
+        self.log(LOG_LEVEL_WARNING, message, **kwargs)
 
     def info(self, message, **kwargs):
-        self.log("INFO", message, **kwargs)
+        self.log(LOG_LEVEL_INFO, message, **kwargs)
 
     def debug(self, message, **kwargs):
-        self.log("DEBUG", message, **kwargs)
+        self.log(LOG_LEVEL_DEBUG, message, **kwargs)
 
 #Quick local test for manual checking
 if __name__ == "__main__":
