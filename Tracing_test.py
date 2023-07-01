@@ -28,7 +28,7 @@ def tracing_test_setup():
 
 def test_error_logging():
     tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_DEBUG)
-    tracer.error('An error occurred.', error_code=123)
+    tracer.error('An error occurred. {error_code}', error_code=123)
     content = get_file_content()
     assert log_contains('An error occurred.', content)
     # assert len(logs) == 1
