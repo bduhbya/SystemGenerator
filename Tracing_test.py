@@ -1,5 +1,5 @@
 import pytest
-from Tracing import LogTrace, LOG_LEVEL_DEBUG
+from Tracing import LogTrace, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
 import os
 
 TEST_LOG_FILE = 'test_log_file.txt'
@@ -55,6 +55,9 @@ def log_and_verify(traceFun, type, shouldLog):
   assert log_contains(line, content) == shouldLog, f"Expected {line} in log to be {shouldLog}"
   assert log_contains(lineType, content) == shouldLog, f"Expected {lineType} in log to be {shouldLog}"
 
+def check_line_count(logFile, count):
+  actual = count_lines(logFile)
+  assert actual == count, f"Expected {count} lines in {logFile}, found {actual}"
 
 @pytest.fixture(autouse=True)
 def tracing_test_setup():
@@ -66,22 +69,46 @@ def tracing_test_setup():
   except OSError as e:
     print(f"tracing_test_setup, Error deleting the file: {e}")
 
-
 def test_debug_logging():
   tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_DEBUG)
   log_and_verify(tracer.debug, DEBUG, True)
-  assert count_lines(TEST_LOG_FILE) == 1
+  check_line_count(TEST_LOG_FILE, 1)
   log_and_verify(tracer.info, INFO, True)
-  assert count_lines(TEST_LOG_FILE) == 2
+  check_line_count(TEST_LOG_FILE, 2)
   log_and_verify(tracer.warning, WARNING, True)
-  assert count_lines(TEST_LOG_FILE) == 3
+  check_line_count(TEST_LOG_FILE, 3)
   log_and_verify(tracer.error, ERROR, True)
-  assert count_lines(TEST_LOG_FILE) == 4
+  check_line_count(TEST_LOG_FILE, 4)
+
+def test_info_logging():
+  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_INFO)
+  log_and_verify(tracer.debug, DEBUG, False)
+  check_line_count(TEST_LOG_FILE, 0)
+  log_and_verify(tracer.info, INFO, True)
+  check_line_count(TEST_LOG_FILE, 1)
+  log_and_verify(tracer.warning, WARNING, True)
+  check_line_count(TEST_LOG_FILE, 2)
+  log_and_verify(tracer.error, ERROR, True)
+  check_line_count(TEST_LOG_FILE, 3)
+
+def test_warn_logging():
+  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_WARNING)
+  log_and_verify(tracer.debug, DEBUG, False)
+  check_line_count(TEST_LOG_FILE, 0)
+  log_and_verify(tracer.info, INFO, False)
+  check_line_count(TEST_LOG_FILE, 0)
+  log_and_verify(tracer.warning, WARNING, True)
+  check_line_count(TEST_LOG_FILE, 1)
+  log_and_verify(tracer.error, ERROR, True)
+  check_line_count(TEST_LOG_FILE, 2)
 
 def test_error_logging():
-  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_DEBUG)
-  tracer.error('An error occurred. {error_code}', error_code=123)
-  content = get_file_content()
-  assert log_contains('An error occurred. 123', content)
-  assert log_contains('| ERROR |', content)
-  assert count_lines(TEST_LOG_FILE) == 1
+  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_ERROR)
+  log_and_verify(tracer.debug, DEBUG, False)
+  check_line_count(TEST_LOG_FILE, 0)
+  log_and_verify(tracer.info, INFO, False)
+  check_line_count(TEST_LOG_FILE, 0)
+  log_and_verify(tracer.warning, WARNING, False)
+  check_line_count(TEST_LOG_FILE, 0)
+  log_and_verify(tracer.error, ERROR, True)
+  check_line_count(TEST_LOG_FILE, 1)
