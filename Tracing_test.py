@@ -27,9 +27,6 @@ LOG_TEST_DATA = [
   }
 ]
 
-TRACE_STATEMENT = 'info log trace'
-TRACE_LINE = '| TRACE |'
-
 def get_file_content():
   try:
     with open(TEST_LOG_FILE, "r") as file:
