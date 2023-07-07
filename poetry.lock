@@ -80,6 +80,20 @@ tomli = {version = ">=1.0.0", markers = "python_version < \"3.11\""}
 testing = ["argcomplete", "attrs (>=19.2.0)", "hypothesis (>=3.56)", "mock", "nose", "pygments (>=2.7.2)", "requests", "setuptools", "xmlschema"]
 
 [[package]]
+name = "pytest-mock"
+version = "3.11.1"
+description = "Thin-wrapper around the mock package for easier use with pytest"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+pytest = ">=5.0"
+
+[package.extras]
+dev = ["pre-commit", "tox", "pytest-asyncio"]
+
+[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -101,7 +115,7 @@ dev = ["pytest (>=4.6.2)", "black (>=19.3b0)"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "bed157382aa6724f7a67d551c3e686d7632d334f73f46bd043bce9747fbdbab9"
+content-hash = "cd7effbecc81b8fd693c53bdef0b313efe4362ad13c53c916c21b5785a717050"
 
 [metadata.files]
 colorama = []
@@ -111,5 +125,6 @@ loguru = []
 packaging = []
 pluggy = []
 pytest = []
+pytest-mock = []
 tomli = []
 win32-setctime = []
