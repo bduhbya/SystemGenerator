@@ -12,6 +12,10 @@ def clean_mocks():
   mocked_LogTrace = None
 
 
+def verify_none_result(input):
+  result = Utility.parseDie(input, mocked_instance)
+  assert result == None, f'Expected None, but got {result}'
+
 @pytest.fixture(autouse=True)
 def mock_handler(mocker):
   global mocked_LogTrace
@@ -25,33 +29,27 @@ def mock_handler(mocker):
 
 
 def test_empty_argument_parseDie(mocker):
-  result = Utility.parseDie('', mocked_instance)
-  assert result == None
+  verify_none_result('')
 
 
 def test_incorrect_argument_parseDie():
-  result = Utility.parseDie('5', mocked_instance)
-  assert result == None
+  verify_none_result('5')
 
 
 def test_none_argument_parseDie():
-  result = Utility.parseDie(None, mocked_instance)
-  assert result == None
+  verify_none_result(None)
 
 
 def test_numeric_argument_parseDie():
-  result = Utility.parseDie(5, mocked_instance)
-  assert result == None
+  verify_none_result(5)
 
 
 def test_non_numeric_parse_data_argument_parseDie():
-  result = Utility.parseDie('sd10', mocked_instance)
-  assert result == None
+  verify_none_result('sd10')
 
 
 def test_badly_format_parse_data_argument_parseDie():
-  result = Utility.parseDie('1d10d5', mocked_instance)
-  assert result == None
+  verify_none_result('1d10d5')
 
 
 def test_one_d10_argument_parseDie():
