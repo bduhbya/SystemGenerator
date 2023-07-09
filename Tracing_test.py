@@ -1,8 +1,10 @@
 import pytest
 from Tracing import LogTrace, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
 import os
+from pathlib import Path
 
 TEST_LOG_FILE = 'test_log_file.txt'
+TEST_LOGGER = 'test_logger.txt'
 
 ERROR = 0
 WARNING = 1
@@ -59,6 +61,17 @@ def check_line_count(logFile, count):
   assert actual == count, f"Expected {count} lines in {logFile}, found {actual}"
 
 
+def verify_assert_and_no_tracing(expectedAssert, testLogger, logFile, level):
+  tracer = None
+  with pytest.raises(expectedAssert):
+    tracer = LogTrace(testLogger, logFile, level)
+
+  file_path = Path(TEST_LOG_FILE)
+  assert tracer == None, "Expected tracer to be None"
+  assert file_path.exists(
+  ) == False, f"Expected file {TEST_LOG_FILE} to not exist"
+
+
 @pytest.fixture(autouse=True)
 def tracing_test_setup():
   # Code to be executed before each test
@@ -70,7 +83,7 @@ def tracing_test_setup():
 
 
 def test_debug_logging():
-  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_DEBUG)
+  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_DEBUG)
   log_and_verify(tracer.debug, DEBUG, True)
   check_line_count(TEST_LOG_FILE, 1)
   log_and_verify(tracer.info, INFO, True)
@@ -82,7 +95,7 @@ def test_debug_logging():
 
 
 def test_info_logging():
-  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_INFO)
+  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_INFO)
   log_and_verify(tracer.debug, DEBUG, False)
   check_line_count(TEST_LOG_FILE, 0)
   log_and_verify(tracer.info, INFO, True)
@@ -94,7 +107,7 @@ def test_info_logging():
 
 
 def test_warn_logging():
-  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_WARNING)
+  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_WARNING)
   log_and_verify(tracer.debug, DEBUG, False)
   check_line_count(TEST_LOG_FILE, 0)
   log_and_verify(tracer.info, INFO, False)
@@ -106,7 +119,7 @@ def test_warn_logging():
 
 
 def test_error_logging():
-  tracer = LogTrace('test_tracer', TEST_LOG_FILE, LOG_LEVEL_ERROR)
+  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_ERROR)
   log_and_verify(tracer.debug, DEBUG, False)
   check_line_count(TEST_LOG_FILE, 0)
   log_and_verify(tracer.info, INFO, False)
@@ -115,3 +128,37 @@ def test_error_logging():
   check_line_count(TEST_LOG_FILE, 0)
   log_and_verify(tracer.error, ERROR, True)
   check_line_count(TEST_LOG_FILE, 1)
+
+
+def test_empty_logger_name():
+  tracer = LogTrace('', TEST_LOG_FILE, LOG_LEVEL_ERROR)
+  file_path = Path(TEST_LOG_FILE)
+  assert file_path.exists() == True, f"Expected file {TEST_LOG_FILE} to exist"
+
+
+def test_none_logger_name():
+  tracer = LogTrace(None, TEST_LOG_FILE, LOG_LEVEL_ERROR)
+  file_path = Path(TEST_LOG_FILE)
+  assert file_path.exists() == True, f"Expected file {TEST_LOG_FILE} to exist"
+
+
+def test_empty_file_name():
+  verify_assert_and_no_tracing(IsADirectoryError, TEST_LOGGER, '',
+                               LOG_LEVEL_ERROR)
+
+
+def test_none_file_name():
+  verify_assert_and_no_tracing(RuntimeError, TEST_LOGGER, None,
+                               LOG_LEVEL_ERROR)
+
+
+def test_bad_type_log_level():
+  verify_assert_and_no_tracing(RuntimeError, TEST_LOGGER, TEST_LOG_FILE, 5)
+
+
+def test_bad_value_log_level():
+  verify_assert_and_no_tracing(RuntimeError, TEST_LOGGER, TEST_LOG_FILE, "5")
+
+
+def test_none_log_level():
+  verify_assert_and_no_tracing(RuntimeError, TEST_LOGGER, TEST_LOG_FILE, None)

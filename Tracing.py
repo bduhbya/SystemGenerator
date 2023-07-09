@@ -5,10 +5,20 @@ LOG_LEVEL_INFO = "INFO"
 LOG_LEVEL_WARNING = "WARNING"
 LOG_LEVEL_ERROR = "ERROR"
 
+LOG_LEVELS = [
+  LOG_LEVEL_DEBUG, LOG_LEVEL_ERROR, LOG_LEVEL_INFO, LOG_LEVEL_WARNING
+]
+
 
 class LogTrace:
 
   def __init__(self, logger_name, log_file_path, log_level):
+    if log_file_path is None:
+      raise RuntimeError('log_file_path must be defined')
+
+    if log_level not in LOG_LEVELS:
+      raise RuntimeError(f'log_level must be in {LOG_LEVELS}')
+
     logger.add(
       log_file_path,
       level=log_level,
