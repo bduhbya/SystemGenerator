@@ -83,6 +83,7 @@ def parseDie(die: str, tracing: Type[Tracing.LogTrace]):
   ConfigVersion object or None
   '''
   try:
+    tracing.info(f'Parsing: {die}')
     parsedDie = parseIntList(die, tracing, 2, 'd', 'parseDie')
     return DieRoll(numRoles=parsedDie[0], dieType=parsedDie[1])
   except Exception as e:
