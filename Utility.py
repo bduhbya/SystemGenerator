@@ -9,16 +9,85 @@ class DieRoll:
   dieType: int
 
 
-def parseDie(die, tracing: Type[Tracing.LogTrace]):
+@dataclass
+class ConfigVersion:
+  major: int
+  minor: int
+
+
+def parseIntList(strValue: str, tracing: Type[Tracing.LogTrace], numParts: int,
+                 split: str, source: str):
+  """
+  This function divides a string into integer parts. NO exception handling is provided.
+  Callers are expected to deal with exceptions.
+
+  Parameters:
+  
+  strValue: str - String to split
+  tracing: Type[Tracing.LogTrace] - Tracing object
+  numParts: int - expected number of parts
+  split: str - Key for splitting string
+  source: str - caller info for tracing
+
+  Return:
+
+  List of int containing converted values or throws exception
+  """
+  tracing.info(f'Parsing: {strValue} for {source}')
+  parts = str.split(strValue, split)
+  if len(parts) != numParts:
+    tracing.error(
+      f'Unable to parse for {source} due to bad format: {strValue}')
+    return None
+
+  returnList = []
+  for value in parts:
+    returnList.append(int(value))
+  return returnList
+
+
+def parseVersion(versionStr: str, tracing: Type[Tracing.LogTrace]):
+  '''
+  Parses file version from json version key's value
+
+  Parameters
+
+  versionStr: str - version value in string form of x.x
+  tracing: Type[Tracing.LogTrace] - tracing object
+
+  Return
+
+  DieRoll object or None
+  '''
   try:
-    tracing.info("Parsing: " + die)
-    parts = str.split(die, 'd')
-    if len(parts) != 2:
-      tracing.error("Unable to parse die due to bad format: " + die)
-      return None
-    return DieRoll(numRoles=int(parts[0]), dieType=int(parts[1]))
+    tracing.info(f'Parsing: {versionStr}')
+    parsedVersion = parseIntList(versionStr, tracing, 2, '.', 'parseVersion')
+    return ConfigVersion(major=parsedVersion[0], minor=parsedVersion[1])
+
   except Exception as e:
-    tracing.error(f"An exception occurred: {type(e).__name__} - {str(e)}")
+    tracing.error(f'An exception occurred: {type(e).__name__} - {str(e)}')
+    return None
+
+
+def parseDie(die: str, tracing: Type[Tracing.LogTrace]):
+  '''
+  Parses die roll from die json key's value
+
+  Parameters
+
+  die: str - die roll in string form of xdx
+  tracing: Type[Tracing.LogTrace] - tracing object
+
+  Return
+
+  ConfigVersion object or None
+  '''
+  try:
+    tracing.info(f'Parsing: {die}')
+    parsedDie = parseIntList(die, tracing, 2, 'd', 'parseDie')
+    return DieRoll(numRoles=parsedDie[0], dieType=parsedDie[1])
+  except Exception as e:
+    tracing.error(f'An exception occurred: {type(e).__name__} - {str(e)}')
     return None
 
 
