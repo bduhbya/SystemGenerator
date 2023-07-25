@@ -3,6 +3,12 @@ from typing import Type
 import Tracing
 
 
+GENERATION_UNIT_TYPES = [
+  'step',
+  'roll',
+  'result'
+]
+
 @dataclass
 class DieRoll:
   numRoles: int
@@ -13,6 +19,11 @@ class DieRoll:
 class ConfigVersion:
   major: int
   minor: int
+
+
+@dataclass
+class GenerationUnitType:
+ genType: str
 
 
 def parseIntList(strValue: str, tracing: Type[Tracing.LogTrace], numParts: int,
@@ -46,6 +57,30 @@ def parseIntList(strValue: str, tracing: Type[Tracing.LogTrace], numParts: int,
   return returnList
 
 
+def validateGenType(genType: str, tracing: Type[Tracing.LogTrace]):
+  """
+  This function validates if the generation unit type is present in the acceptable
+  types. 
+
+  Parameters:
+  
+  strValue: str - Generation unit to validate
+  tracing: Type[Tracing.LogTrace] - Tracing object
+
+  Return:
+
+  boolean: true for valid type, false otherwise. Throws exception on
+  bad input types
+  """
+  tracing.info(f'Validating input: {genType}')
+  if genType in GENERATION_UNIT_TYPES:
+    tracing.info(f'{genType} is valid type')
+    return True
+  else:
+    tracing.warning(f'{genType} not valid. Valid types: {GENERATION_UNIT_TYPES}')
+    return False
+
+
 def parseVersion(versionStr: str, tracing: Type[Tracing.LogTrace]):
   '''
   Parses file version from json version key's value
@@ -62,7 +97,9 @@ def parseVersion(versionStr: str, tracing: Type[Tracing.LogTrace]):
   try:
     tracing.info(f'Parsing: {versionStr}')
     parsedVersion = parseIntList(versionStr, tracing, 2, '.', 'parseVersion')
-    return ConfigVersion(major=parsedVersion[0], minor=parsedVersion[1])
+    retVal = ConfigVersion(major=parsedVersion[0], minor=parsedVersion[1])
+    tracing.info(f'Parsed successfully: {retVal}')
+    return retVal
 
   except Exception as e:
     tracing.error(f'An exception occurred: {type(e).__name__} - {str(e)}')
@@ -85,7 +122,34 @@ def parseDie(die: str, tracing: Type[Tracing.LogTrace]):
   try:
     tracing.info(f'Parsing: {die}')
     parsedDie = parseIntList(die, tracing, 2, 'd', 'parseDie')
-    return DieRoll(numRoles=parsedDie[0], dieType=parsedDie[1])
+    retVal = DieRoll(numRoles=parsedDie[0], dieType=parsedDie[1])
+    tracing.info(f'Parsed successfully: {retVal}')
+    return retVal
+  except Exception as e:
+    tracing.error(f'An exception occurred: {type(e).__name__} - {str(e)}')
+    return None
+
+def parseGenType(genType: str, tracing: Type[Tracing.LogTrace]):
+  '''
+  Parses the generation unit type.
+
+  Parameters
+
+  genType: str - Generation unit type
+  tracing: Type[Tracing.LogTrace] - tracing object
+
+  Return
+
+  Str object or None
+  '''
+  try:
+    tracing.info(f'Parsing: {genType}')
+    if validateGenType(genType, tracing):
+      tracing.info(f'Parsed successfully: {genType}')
+      return GenerationUnitType(genType=genType)
+    else:
+      tracing.warning(f'{genType} is not a supported generation unit type')
+      return None
   except Exception as e:
     tracing.error(f'An exception occurred: {type(e).__name__} - {str(e)}')
     return None

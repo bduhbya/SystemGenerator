@@ -45,6 +45,9 @@ class LogTrace:
   def debug(self, message, **kwargs):
     self.log(LOG_LEVEL_DEBUG, message, **kwargs)
 
+  def close(self):
+    self.logger.complete()
+    self.logger.remove()
 
 #Quick local test for manual checking
 if __name__ == "__main__":
