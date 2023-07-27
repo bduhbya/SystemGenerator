@@ -12,9 +12,9 @@ test_tracer = None
 def clear_test_file():
   try:
     os.remove(UTIL_LOGGING_FILE)
-    print("tracing_test_setup, Removed previous test file: " + UTIL_LOGGING_FILE)
+    print(f"clear_test_file, Removed previous test file: {UTIL_LOGGING_FILE}")
   except OSError as e:
-    print(f"tracing_test_setup, Error deleting the file: {e}")
+    print(f"clear_test_file, Error deleting file  {UTIL_LOGGING_FILE}: {type(e).__name__} - {str(e)}")
 
 def setup_logging():
   global test_tracer
