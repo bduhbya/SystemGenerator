@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 
 TEST_LOG_FILE = 'test_log_file.txt'
-TEST_LOGGER = 'test_logger.txt'
+TEST_LOGGER = 'test_logger'
 
 ERROR = 0
 WARNING = 1
@@ -34,6 +34,15 @@ def get_file_content():
     print(f"An error occurred: {e}")
 
 
+def get_file_content_2(fileName):
+  try:
+    with open(fileName, "r") as file:
+      content = file.read()
+      return content
+  except Exception as e:
+    print(f"An error occurred: {e}")
+
+
 def log_contains(value, logContent):
   return value in logContent
 
@@ -42,6 +51,19 @@ def count_lines(file_path):
   with open(file_path, 'r') as file:
     line_count = sum(1 for line in file)
   return line_count
+
+
+def log_and_verify_file(traceFun, type, shouldLog, method):
+  fileName = method.__name__ + "_" + TEST_LOG_FILE
+  line = LOG_TEST_DATA[type].get('LOG_LINE')
+  lineType = LOG_TEST_DATA[type].get('LINE_TYPE')
+  traceFun(line)
+  content = get_file_content_2(fileName)
+  assert log_contains(
+    line, content) == shouldLog, f"Expected {line} in log to be {shouldLog}"
+  assert log_contains(
+    lineType,
+    content) == shouldLog, f"Expected {lineType} in log to be {shouldLog}"
 
 
 def log_and_verify(traceFun, type, shouldLog):
@@ -61,6 +83,12 @@ def check_line_count(logFile, count):
   assert actual == count, f"Expected {count} lines in {logFile}, found {actual}"
 
 
+def check_line_count_2(method, count):
+  logFile = method.__name__ + "_" + TEST_LOG_FILE
+  actual = count_lines(logFile)
+  assert actual == count, f"Expected {count} lines in {logFile}, found {actual}"
+
+
 def verify_assert_and_no_tracing(expectedAssert, testLogger, logFile, level):
   tracer = None
   with pytest.raises(expectedAssert):
@@ -70,6 +98,27 @@ def verify_assert_and_no_tracing(expectedAssert, testLogger, logFile, level):
   assert tracer == None, "Expected tracer to be None"
   assert file_path.exists(
   ) == False, f"Expected file {TEST_LOG_FILE} to not exist"
+
+
+
+def clear_test_file(name):
+  try:
+    os.remove(name)
+    print(f"clear_test_file, Removed previous test file: {name}")
+  except OSError as e:
+    print(f"clear_test_file, Error deleting file  {name}: {type(e).__name__} - {str(e)}")
+
+
+def get_logger_and_clean_previous(method, logLevel):
+  fileName = method.__name__ + "_" + TEST_LOG_FILE
+  clear_test_file(fileName)
+  return LogTrace(method, fileName, logLevel)
+
+
+# def setup_logging():
+#   global test_tracer
+#   if test_tracer is None:
+#     test_tracer = Tracing.LogTrace(UTIL_LOGGING, UTIL_LOGGING_FILE, TRACE_LEVEL)
 
 
 @pytest.fixture(autouse=True)
@@ -83,15 +132,15 @@ def tracing_test_setup():
 
 
 def test_debug_logging():
-  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_DEBUG)
-  log_and_verify(tracer.debug, DEBUG, True)
-  check_line_count(TEST_LOG_FILE, 1)
-  log_and_verify(tracer.info, INFO, True)
-  check_line_count(TEST_LOG_FILE, 2)
-  log_and_verify(tracer.warning, WARNING, True)
-  check_line_count(TEST_LOG_FILE, 3)
-  log_and_verify(tracer.error, ERROR, True)
-  check_line_count(TEST_LOG_FILE, 4)
+  tracer = get_logger_and_clean_previous(test_debug_logging, LOG_LEVEL_DEBUG)
+  log_and_verify_file(tracer.debug, DEBUG, True, test_debug_logging)
+  check_line_count_2(test_debug_logging, 1)
+  log_and_verify_file(tracer.info, INFO, True, test_debug_logging)
+  check_line_count_2(test_debug_logging, 2)
+  log_and_verify_file(tracer.warning, WARNING, True, test_debug_logging)
+  check_line_count_2(test_debug_logging, 3)
+  log_and_verify_file(tracer.error, ERROR, True, test_debug_logging)
+  check_line_count_2(test_debug_logging, 4)
 
 
 def test_info_logging():
