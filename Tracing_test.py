@@ -1,3 +1,4 @@
+import platform
 import pytest
 from Tracing import LogTrace, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
 import os
@@ -175,7 +176,12 @@ def test_none_logger_name():
 
 
 def test_empty_file_name():
-  verify_assert_and_no_tracing(IsADirectoryError, TEST_LOGGER, '',
+  expected_assert = None
+  if platform.system() == "Windows":
+    expected_assert = PermissionError
+  else:
+    expected_assert = IsADirectoryError
+  verify_assert_and_no_tracing(expected_assert, TEST_LOGGER, '',
                                LOG_LEVEL_ERROR)
 
 
