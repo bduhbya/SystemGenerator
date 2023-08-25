@@ -29,16 +29,7 @@ LOG_TEST_DATA = [{
 }]
 
 
-def get_file_content():
-  try:
-    with open(TEST_LOG_FILE, "r") as file:
-      content = file.read()
-      return content
-  except Exception as e:
-    print(f"An error occurred: {e}")
-
-
-def get_file_content_2(fileName):
+def get_file_content(fileName):
   try:
     with open(fileName, "r") as file:
       content = file.read()
@@ -66,7 +57,7 @@ def log_and_verify_file(traceFun, type, shouldLog, method):
   line = LOG_TEST_DATA[type].get('LOG_LINE')
   lineType = LOG_TEST_DATA[type].get('LINE_TYPE')
   traceFun(line)
-  content = get_file_content_2(fileName)
+  content = get_file_content(fileName)
   assert log_contains(
     line, content) == shouldLog, f"Expected {line} in log to be {shouldLog}"
   assert log_contains(
@@ -74,24 +65,7 @@ def log_and_verify_file(traceFun, type, shouldLog, method):
     content) == shouldLog, f"Expected {lineType} in log to be {shouldLog}"
 
 
-def log_and_verify(traceFun, type, shouldLog):
-  line = LOG_TEST_DATA[type].get('LOG_LINE')
-  lineType = LOG_TEST_DATA[type].get('LINE_TYPE')
-  traceFun(line)
-  content = get_file_content()
-  assert log_contains(
-    line, content) == shouldLog, f"Expected {line} in log to be {shouldLog}"
-  assert log_contains(
-    lineType,
-    content) == shouldLog, f"Expected {lineType} in log to be {shouldLog}"
-
-
-def check_line_count(logFile, count):
-  actual = count_lines(logFile)
-  assert actual == count, f"Expected {count} lines in {logFile}, found {actual}"
-
-
-def check_line_count_2(method, count):
+def check_line_count(method, count):
   fileName = get_log_name(method)
   actual = count_lines(fileName)
   assert actual == count, f"Expected {count} lines in {fileName}, found {actual}"
@@ -142,49 +116,49 @@ def tracing_test_setup():
 def test_debug_logging():
   tracer = get_logger_and_clean_previous(test_debug_logging, LOG_LEVEL_DEBUG)
   log_and_verify_file(tracer.debug, DEBUG, True, test_debug_logging)
-  check_line_count_2(test_debug_logging, 1)
+  check_line_count(test_debug_logging, 1)
   log_and_verify_file(tracer.info, INFO, True, test_debug_logging)
-  check_line_count_2(test_debug_logging, 2)
+  check_line_count(test_debug_logging, 2)
   log_and_verify_file(tracer.warning, WARNING, True, test_debug_logging)
-  check_line_count_2(test_debug_logging, 3)
+  check_line_count(test_debug_logging, 3)
   log_and_verify_file(tracer.error, ERROR, True, test_debug_logging)
-  check_line_count_2(test_debug_logging, 4)
+  check_line_count(test_debug_logging, 4)
 
 
 def test_info_logging():
-  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_INFO)
-  log_and_verify(tracer.debug, DEBUG, False)
-  check_line_count(TEST_LOG_FILE, 0)
-  log_and_verify(tracer.info, INFO, True)
-  check_line_count(TEST_LOG_FILE, 1)
-  log_and_verify(tracer.warning, WARNING, True)
-  check_line_count(TEST_LOG_FILE, 2)
-  log_and_verify(tracer.error, ERROR, True)
-  check_line_count(TEST_LOG_FILE, 3)
+  tracer = get_logger_and_clean_previous(test_info_logging, LOG_LEVEL_INFO)
+  log_and_verify_file(tracer.debug, DEBUG, False, test_info_logging)
+  check_line_count(test_info_logging, 0)
+  log_and_verify_file(tracer.info, INFO, True, test_info_logging)
+  check_line_count(test_info_logging, 1)
+  log_and_verify_file(tracer.warning, WARNING, True, test_info_logging)
+  check_line_count(test_info_logging, 2)
+  log_and_verify_file(tracer.error, ERROR, True, test_info_logging)
+  check_line_count(test_info_logging, 3)
 
 
 def test_warn_logging():
-  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_WARNING)
-  log_and_verify(tracer.debug, DEBUG, False)
-  check_line_count(TEST_LOG_FILE, 0)
-  log_and_verify(tracer.info, INFO, False)
-  check_line_count(TEST_LOG_FILE, 0)
-  log_and_verify(tracer.warning, WARNING, True)
-  check_line_count(TEST_LOG_FILE, 1)
-  log_and_verify(tracer.error, ERROR, True)
-  check_line_count(TEST_LOG_FILE, 2)
+  tracer = get_logger_and_clean_previous(test_warn_logging, LOG_LEVEL_WARNING)
+  log_and_verify_file(tracer.debug, DEBUG, False, test_warn_logging)
+  check_line_count(test_warn_logging, 0)
+  log_and_verify_file(tracer.info, INFO, False, test_warn_logging)
+  check_line_count(test_warn_logging, 0)
+  log_and_verify_file(tracer.warning, WARNING, True, test_warn_logging)
+  check_line_count(test_warn_logging, 1)
+  log_and_verify_file(tracer.error, ERROR, True, test_warn_logging)
+  check_line_count(test_warn_logging, 2)
 
 
 def test_error_logging():
-  tracer = LogTrace(TEST_LOGGER, TEST_LOG_FILE, LOG_LEVEL_ERROR)
-  log_and_verify(tracer.debug, DEBUG, False)
-  check_line_count(TEST_LOG_FILE, 0)
-  log_and_verify(tracer.info, INFO, False)
-  check_line_count(TEST_LOG_FILE, 0)
-  log_and_verify(tracer.warning, WARNING, False)
-  check_line_count(TEST_LOG_FILE, 0)
-  log_and_verify(tracer.error, ERROR, True)
-  check_line_count(TEST_LOG_FILE, 1)
+  tracer = get_logger_and_clean_previous(test_error_logging, LOG_LEVEL_ERROR)
+  log_and_verify_file(tracer.debug, DEBUG, False, test_error_logging)
+  check_line_count(test_error_logging, 0)
+  log_and_verify_file(tracer.info, INFO, False, test_error_logging)
+  check_line_count(test_error_logging, 0)
+  log_and_verify_file(tracer.warning, WARNING, False, test_error_logging)
+  check_line_count(test_error_logging, 0)
+  log_and_verify_file(tracer.error, ERROR, True, test_error_logging)
+  check_line_count(test_error_logging, 1)
 
 
 def test_empty_logger_name():
