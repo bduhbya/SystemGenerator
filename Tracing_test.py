@@ -3,6 +3,9 @@ from Tracing import LogTrace, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING
 import os
 from pathlib import Path
 
+
+TEST_LOG_DIR = 'UNIT_TEST_LOGS'
+TEST_LOG_FILE_POSTFIX = '_test_log_file.txt'
 TEST_LOG_FILE = 'test_log_file.txt'
 TEST_LOGGER = 'test_logger'
 
@@ -10,6 +13,7 @@ ERROR = 0
 WARNING = 1
 INFO = 2
 DEBUG = 3
+
 LOG_TEST_DATA = [{
   'LOG_LINE': 'error log trace',
   'LINE_TYPE': '| ERROR |'
@@ -53,8 +57,12 @@ def count_lines(file_path):
   return line_count
 
 
+def get_log_name(method):
+  return os.path.join(TEST_LOG_DIR, method.__name__ + TEST_LOG_FILE_POSTFIX)
+  #Path(TEST_LOG_DIR) / method.__name__ + TEST_LOG_FILE_POSTFIX
+
 def log_and_verify_file(traceFun, type, shouldLog, method):
-  fileName = method.__name__ + "_" + TEST_LOG_FILE
+  fileName = get_log_name(method)
   line = LOG_TEST_DATA[type].get('LOG_LINE')
   lineType = LOG_TEST_DATA[type].get('LINE_TYPE')
   traceFun(line)
@@ -84,9 +92,9 @@ def check_line_count(logFile, count):
 
 
 def check_line_count_2(method, count):
-  logFile = method.__name__ + "_" + TEST_LOG_FILE
-  actual = count_lines(logFile)
-  assert actual == count, f"Expected {count} lines in {logFile}, found {actual}"
+  fileName = get_log_name(method)
+  actual = count_lines(fileName)
+  assert actual == count, f"Expected {count} lines in {fileName}, found {actual}"
 
 
 def verify_assert_and_no_tracing(expectedAssert, testLogger, logFile, level):
@@ -110,7 +118,7 @@ def clear_test_file(name):
 
 
 def get_logger_and_clean_previous(method, logLevel):
-  fileName = method.__name__ + "_" + TEST_LOG_FILE
+  fileName = get_log_name(method)
   clear_test_file(fileName)
   return LogTrace(method, fileName, logLevel)
 
