@@ -50,7 +50,6 @@ def count_lines(file_path):
 
 def get_log_name(method):
   return os.path.join(TEST_LOG_DIR, method.__name__ + TEST_LOG_FILE_POSTFIX)
-  #Path(TEST_LOG_DIR) / method.__name__ + TEST_LOG_FILE_POSTFIX
 
 def log_and_verify_file(traceFun, type, shouldLog, method):
   fileName = get_log_name(method)
@@ -162,14 +161,16 @@ def test_error_logging():
 
 
 def test_empty_logger_name():
-  tracer = LogTrace('', TEST_LOG_FILE, LOG_LEVEL_ERROR)
-  file_path = Path(TEST_LOG_FILE)
+  logger_name = get_log_name(test_empty_logger_name)
+  tracer = LogTrace('', logger_name, LOG_LEVEL_ERROR)
+  file_path = Path(logger_name)
   assert file_path.exists() == True, f"Expected file {TEST_LOG_FILE} to exist"
 
 
 def test_none_logger_name():
-  tracer = LogTrace(None, TEST_LOG_FILE, LOG_LEVEL_ERROR)
-  file_path = Path(TEST_LOG_FILE)
+  logger_name = get_log_name(test_none_logger_name)
+  tracer = LogTrace(None, logger_name, LOG_LEVEL_ERROR)
+  file_path = Path(logger_name)
   assert file_path.exists() == True, f"Expected file {TEST_LOG_FILE} to exist"
 
 
