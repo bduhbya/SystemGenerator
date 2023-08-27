@@ -2,9 +2,10 @@ import Utility
 import pytest
 import Tracing
 import os
+from Unit_test_common import get_test_log_file_name
 
 UTIL_LOGGING = 'utility_test'
-UTIL_LOGGING_FILE = UTIL_LOGGING + '_log_file.txt'
+UTIL_LOGGING_FILE = get_test_log_file_name(UTIL_LOGGING)
 TRACE_LEVEL = Tracing.LOG_LEVEL_DEBUG
 
 test_tracer = None
