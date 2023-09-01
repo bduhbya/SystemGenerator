@@ -1,21 +1,13 @@
 import Utility
 import pytest
 import Tracing
-import os
-from Unit_test_common import get_test_log_file_name
+from Unit_test_common import get_test_log_file_name, clear_test_file
 
 UTIL_LOGGING = 'utility_test'
 UTIL_LOGGING_FILE = get_test_log_file_name(UTIL_LOGGING)
 TRACE_LEVEL = Tracing.LOG_LEVEL_DEBUG
 
 test_tracer = None
-
-def clear_test_file():
-  try:
-    os.remove(UTIL_LOGGING_FILE)
-    print(f"clear_test_file, Removed previous test file: {UTIL_LOGGING_FILE}")
-  except OSError as e:
-    print(f"clear_test_file, Error deleting file  {UTIL_LOGGING_FILE}: {type(e).__name__} - {str(e)}")
 
 def setup_logging():
   global test_tracer
@@ -46,7 +38,7 @@ def verify_gen_type_result(input, expected):
 
 @pytest.fixture(scope="module", autouse=True)
 def setup_module():
-  clear_test_file()
+  clear_test_file(UTIL_LOGGING_FILE, f"{__name__} - setup_module")
 
 
 @pytest.fixture(autouse=True)

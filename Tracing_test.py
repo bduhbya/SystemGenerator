@@ -1,9 +1,8 @@
 import platform
 import pytest
 from Tracing import LogTrace, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
-import os
 from pathlib import Path
-from Unit_test_common import get_test_log_file_name
+from Unit_test_common import get_test_log_file_name, clear_test_file
 
 
 TEST_LOGGER = 'test_logger'
@@ -81,17 +80,9 @@ def verify_assert_and_no_tracing(expectedAssert, testLogger, logFile, level, log
 
 
 
-def clear_test_file(name):
-  try:
-    os.remove(name)
-    print(f"clear_test_file, Removed previous test file: {name}")
-  except OSError as e:
-    print(f"clear_test_file, Error deleting file  {name}: {type(e).__name__} - {str(e)}")
-
-
 def get_logger_and_clean_previous(method, logLevel):
   fileName = get_log_name(method)
-  clear_test_file(fileName)
+  clear_test_file(fileName, f"{__name__} - {method}")
   return LogTrace(method, fileName, logLevel)
 
 
